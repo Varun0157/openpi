@@ -248,8 +248,8 @@ def main(config: _config.TrainConfig):
     )
 
     start_step = int(train_state.step)
-    print(start_step)
-    print(config.num_train_steps)
+    print(f"start_step: {start_step}")
+    print(f"num train steps: {config.num_train_steps}")
     pbar = tqdm.tqdm(
         range(start_step, config.num_train_steps),
         initial=start_step,
