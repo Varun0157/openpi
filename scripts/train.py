@@ -232,6 +232,7 @@ def main(config: _config.TrainConfig):
         for i in range(min(5, len(next(iter(batch[0].images.values())))))
     ]
     wandb.log({"camera_views": images_to_log}, step=0)
+    logging.info(f"Logged {len(images_to_log)} camera views from the first batch.")
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
