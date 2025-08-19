@@ -742,7 +742,7 @@ _CONFIGS = [
             decay_lr=5e-5,
         ),
         num_train_steps=100,  # 100k steps should be sufficient, takes ~2 days on 8x H100s
-        batch_size=64,
+        batch_size=32,
         log_interval=100,
         save_interval=5000,
         keep_period=20_000,
