@@ -251,17 +251,22 @@ def main(config: _config.TrainConfig):
     start_step = int(train_state.step)
     logging.info(f"start_step: {start_step}")
     logging.info(f"num train steps: {config.num_train_steps}")
+    logging.info(f"About to enter training loop, creating progress bar")
     pbar = tqdm.tqdm(
         range(start_step, config.num_train_steps),
         initial=start_step,
         total=config.num_train_steps,
         dynamic_ncols=True,
     )
+    logging.info(f"Progress bar created, starting training loop")
 
     infos = []
     for step in pbar:
+        logging.info(f"Starting training step {step}")
         with sharding.set_mesh(mesh):
+            logging.info(f"About to call ptrain_step for step {step}")
             train_state, info = ptrain_step(train_rng, train_state, batch)
+            logging.info(f"Completed ptrain_step for step {step}")
         infos.append(info)
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
@@ -270,7 +275,9 @@ def main(config: _config.TrainConfig):
             pbar.write(f"Step {step}: {info_str}")
             wandb.log(reduced_info, step=step)
             infos = []
+        logging.info(f"About to fetch next batch for step {step}")
         batch = next(data_iter)
+        logging.info(f"Successfully fetched next batch for step {step}")
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
