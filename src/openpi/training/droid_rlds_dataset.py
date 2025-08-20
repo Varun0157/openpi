@@ -28,7 +28,7 @@ class DroidRldsDataset:
         action_space: DroidActionSpace = DroidActionSpace.JOINT_POSITION,
         max_loaded_steps_per_episode: int = 100,
         # Reduce this if you are running out of memory, but careful -- below ~100k shuffling is not sufficiently random.
-        shuffle_buffer_size: int = 10_000,
+        shuffle_buffer_size: int = 500,
         num_parallel_reads: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
         num_parallel_calls: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
     ):
@@ -40,6 +40,18 @@ class DroidRldsDataset:
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
         tf.config.set_visible_devices([], "GPU")
 
+        # attempted fix 1: set tensorflow memory growth and limits
+        import os
+
+        if "TF_FORCE_GPU_ALLOW_GROWTH" not in os.environ:
+            os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+
+        # attempted fix 2: properly configure num_parallel_reads and calls
+        if num_parallel_reads == -1:
+            num_parallel_reads = tf.data.AUTOTUNE
+        if num_parallel_calls == -1:
+            num_parallel_calls = tf.data.AUTOTUNE
+
         builder = tfds.builder("droid", data_dir=data_dir)
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
 
@@ -49,6 +61,9 @@ class DroidRldsDataset:
                 traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
             )
         )
+
+        # attempted fix 3: add prefetching before repeat to avoid
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
         # Repeat dataset so we never run out of data.
         dataset = dataset.repeat()
@@ -146,6 +161,17 @@ class DroidRldsDataset:
         # Shuffle, batch
         # dataset = dataset.shuffle(shuffle_buffer_size)
         dataset = dataset.batch(batch_size)
+
+        # attempted fix 4: add proper prefetching at the end
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
+
+        # attempted fix 5: set some options for better memory management
+        options = tf.data.Options()
+        options.experimental_optimization.map_parallelization = True
+        options.experimental_optimization.parallel_batch = True
+        options.experimental_optimization.inject_prefetch = True
+        dataset = dataset.with_options(options)
+
         # Note =>> Seems to reduce memory usage without affecting speed?
         dataset = dataset.with_ram_budget(1)
 
