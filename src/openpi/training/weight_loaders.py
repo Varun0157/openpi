@@ -1,4 +1,5 @@
 import dataclasses
+import pdb
 import logging
 import re
 from typing import Protocol, runtime_checkable
@@ -48,9 +49,9 @@ class CheckpointWeightLoader(WeightLoader):
     params_path: str
 
     def load(self, params: at.Params) -> at.Params:
-        # We are loading np.ndarray and relying on the training code to properly convert and shard the params.
-        import pdb
+        logger.info("inside load method")
 
+        # We are loading np.ndarray and relying on the training code to properly convert and shard the params.
         pdb.set_trace()
         loaded_params = _model.restore_params(download.maybe_download(self.params_path), restore_type=np.ndarray)
 
@@ -96,7 +97,9 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
     result = {}
     for k, v in flat_loaded.items():
         if k in flat_ref:
-            result[k] = v.astype(flat_ref[k].dtype)
+            result[k] = v.astype(flat_ref[k].dtype) if v.dtype != flat_ref[k].dtype else v
+
+    flat_loaded.clear()
 
     # Then, merge any missing weights as defined by the missing regex.
     pattern = re.compile(missing_regex)
