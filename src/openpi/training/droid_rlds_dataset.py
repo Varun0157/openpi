@@ -42,9 +42,9 @@ class DroidRldsDataset:
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
         tf.config.set_visible_devices([], "GPU")
 
-        # attempted fix
-        tf.config.threading.set_inter_op_parallelism_threads(2)
-        tf.config.threading.set_intra_op_parallelism_threads(4)
+        # # attempted fix
+        # tf.config.threading.set_inter_op_parallelism_threads(2)
+        # tf.config.threading.set_intra_op_parallelism_threads(4)
 
         gc.collect()
 
