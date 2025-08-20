@@ -30,7 +30,7 @@ class DroidRldsDataset:
         action_space: DroidActionSpace = DroidActionSpace.JOINT_POSITION,
         max_loaded_steps_per_episode: int = 100,
         # Reduce this if you are running out of memory, but careful -- below ~100k shuffling is not sufficiently random.
-        shuffle_buffer_size: int = 500,
+        shuffle_buffer_size: int = 2_000,
         num_parallel_reads: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
         num_parallel_calls: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
     ):
@@ -152,7 +152,7 @@ class DroidRldsDataset:
         dataset = dataset.frame_map(decode_images, num_parallel_calls)
 
         # Shuffle, batch
-        # dataset = dataset.shuffle(shuffle_buffer_size)
+        dataset = dataset.shuffle(shuffle_buffer_size)
         dataset = dataset.batch(batch_size)
 
         # Note =>> Seems to reduce memory usage without affecting speed?
