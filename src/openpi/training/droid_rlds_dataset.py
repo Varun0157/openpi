@@ -46,7 +46,7 @@ class DroidRldsDataset:
         # tf.config.threading.set_inter_op_parallelism_threads(2)
         # tf.config.threading.set_intra_op_parallelism_threads(4)
 
-        gc.collect()
+        # gc.collect()
 
         builder = tfds.builder("droid", data_dir=data_dir)
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
@@ -162,7 +162,7 @@ class DroidRldsDataset:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
-        gc.collect()
+        # gc.collect()
 
     def __iter__(self):
         yield from self.dataset.as_numpy_iterator()
