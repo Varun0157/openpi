@@ -8,8 +8,6 @@ The data loader also applies a few DROID-specific data filters / transformations
 from enum import Enum
 from enum import auto
 
-import gc
-
 
 class DroidActionSpace(Enum):
     """Action space for DROID dataset."""
@@ -30,7 +28,7 @@ class DroidRldsDataset:
         action_space: DroidActionSpace = DroidActionSpace.JOINT_POSITION,
         max_loaded_steps_per_episode: int = 100,
         # Reduce this if you are running out of memory, but careful -- below ~100k shuffling is not sufficiently random.
-        shuffle_buffer_size: int = 500,
+        shuffle_buffer_size: int = 250_000,
         num_parallel_reads: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
         num_parallel_calls: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
     ):
@@ -42,23 +40,6 @@ class DroidRldsDataset:
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
         tf.config.set_visible_devices([], "GPU")
 
-        tf.config.threading.set_inter_op_parallelism_threads(2)
-        tf.config.threading.set_intra_op_parallelism_threads(4)
-
-        gc.collect()
-
-        # attempted fix 1: set tensorflow memory growth and limits
-        import os
-
-        if "TF_FORCE_GPU_ALLOW_GROWTH" not in os.environ:
-            os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
-
-        # attempted fix 2: properly configure num_parallel_reads and calls
-        if num_parallel_reads == -1:
-            num_parallel_reads = tf.data.AUTOTUNE
-        if num_parallel_calls == -1:
-            num_parallel_calls = tf.data.AUTOTUNE
-
         builder = tfds.builder("droid", data_dir=data_dir)
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
 
@@ -68,9 +49,6 @@ class DroidRldsDataset:
                 traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
             )
         )
-
-        # attempted fix 3: add prefetching before repeat to avoid
-        dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
         # Repeat dataset so we never run out of data.
         dataset = dataset.repeat()
@@ -166,22 +144,8 @@ class DroidRldsDataset:
         dataset = dataset.frame_map(decode_images, num_parallel_calls)
 
         # Shuffle, batch
-        # dataset = dataset.shuffle(shuffle_buffer_size)
+        dataset = dataset.shuffle(shuffle_buffer_size)
         dataset = dataset.batch(batch_size)
-
-        # attempted fix 4: add proper prefetching at the end
-        dataset = dataset.prefetch(tf.data.AUTOTUNE)
-
-        # attempted fix 5: set some options for better memory management
-        options = tf.data.Options()
-        options.experimental_optimization.map_parallelization = False
-        options.experimental_optimization.parallel_batch = False
-        options.experimental_optimization.inject_prefetch = False
-        options.experimental_slack = False
-        options.threading.private_threadpool_size = 4
-        options.threading.max_intra_op_parallelism = 4
-        dataset = dataset.with_options(options)
-
         # Note =>> Seems to reduce memory usage without affecting speed?
         dataset = dataset.with_ram_budget(1)
 
@@ -189,12 +153,10 @@ class DroidRldsDataset:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
-        gc.collect()
-
     def __iter__(self):
         yield from self.dataset.as_numpy_iterator()
 
     def __len__(self):
         # This is the approximate number of samples in DROID after filtering.
         # Easier to hardcode than to iterate through the dataset and compute it.
-        return 20_000
+        return 20_000_000
