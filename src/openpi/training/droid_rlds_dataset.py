@@ -169,9 +169,6 @@ class DroidRldsDataset:
         # dataset = dataset.shuffle(shuffle_buffer_size)
         dataset = dataset.batch(batch_size)
 
-        # attempted fix 4: add proper prefetching at the end
-        dataset = dataset.prefetch(tf.data.AUTOTUNE)
-
         # Note =>> Seems to reduce memory usage without affecting speed?
         dataset = dataset.with_ram_budget(1)
 
