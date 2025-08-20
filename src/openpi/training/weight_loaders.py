@@ -52,10 +52,10 @@ class CheckpointWeightLoader(WeightLoader):
         logger.info("inside load method")
 
         # We are loading np.ndarray and relying on the training code to properly convert and shard the params.
-        pdb.set_trace()
+        # pdb.set_trace()
         loaded_params = _model.restore_params(download.maybe_download(self.params_path), restore_type=np.ndarray)
 
-        pdb.set_trace()
+        # pdb.set_trace()
         # Add all missing LoRA weights.
         return _merge_params(loaded_params, params, missing_regex=".*lora.*")
 
