@@ -172,16 +172,6 @@ class DroidRldsDataset:
         # attempted fix 4: add proper prefetching at the end
         dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
-        # attempted fix 5: set some options for better memory management
-        options = tf.data.Options()
-        options.experimental_optimization.map_parallelization = False
-        options.experimental_optimization.parallel_batch = False
-        options.experimental_optimization.inject_prefetch = False
-        options.experimental_slack = False
-        options.threading.private_threadpool_size = 4
-        options.threading.max_intra_op_parallelism = 4
-        dataset = dataset.with_options(options)
-
         # Note =>> Seems to reduce memory usage without affecting speed?
         dataset = dataset.with_ram_budget(1)
 
