@@ -197,4 +197,4 @@ class DroidRldsDataset:
     def __len__(self):
         # This is the approximate number of samples in DROID after filtering.
         # Easier to hardcode than to iterate through the dataset and compute it.
-        return 100
+        return 20_000
