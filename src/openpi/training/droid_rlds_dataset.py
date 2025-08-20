@@ -42,16 +42,11 @@ class DroidRldsDataset:
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
         tf.config.set_visible_devices([], "GPU")
 
+        # attempted fix
         tf.config.threading.set_inter_op_parallelism_threads(2)
         tf.config.threading.set_intra_op_parallelism_threads(4)
 
         gc.collect()
-
-        # attempted fix 1: set tensorflow memory growth and limits
-        import os
-
-        if "TF_FORCE_GPU_ALLOW_GROWTH" not in os.environ:
-            os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
         builder = tfds.builder("droid", data_dir=data_dir)
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
