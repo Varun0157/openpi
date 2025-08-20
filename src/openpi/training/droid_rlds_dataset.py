@@ -8,6 +8,8 @@ The data loader also applies a few DROID-specific data filters / transformations
 from enum import Enum
 from enum import auto
 
+import gc
+
 
 class DroidActionSpace(Enum):
     """Action space for DROID dataset."""
@@ -39,6 +41,11 @@ class DroidRldsDataset:
 
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
         tf.config.set_visible_devices([], "GPU")
+
+        tf.config.threading.set_inter_op_parallelism_threads(2)
+        tf.config.threading.set_intra_op_parallelism_threads(4)
+
+        gc.collect()
 
         # attempted fix 1: set tensorflow memory growth and limits
         import os
@@ -167,9 +174,12 @@ class DroidRldsDataset:
 
         # attempted fix 5: set some options for better memory management
         options = tf.data.Options()
-        options.experimental_optimization.map_parallelization = True
-        options.experimental_optimization.parallel_batch = True
-        options.experimental_optimization.inject_prefetch = True
+        options.experimental_optimization.map_parallelization = False
+        options.experimental_optimization.parallel_batch = False
+        options.experimental_optimization.inject_prefetch = False
+        options.experimental_slack = False
+        options.threading.private_threadpool_size = 4
+        options.threading.max_intra_op_parallelism = 4
         dataset = dataset.with_options(options)
 
         # Note =>> Seems to reduce memory usage without affecting speed?
@@ -178,6 +188,8 @@ class DroidRldsDataset:
         self.dataset = dataset
         self.batch_size = batch_size
         self.shuffle = shuffle
+
+        gc.collect()
 
     def __iter__(self):
         yield from self.dataset.as_numpy_iterator()
