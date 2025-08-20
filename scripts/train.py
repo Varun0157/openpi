@@ -1,3 +1,4 @@
+import pdb
 import dataclasses
 import functools
 import logging
@@ -121,6 +122,7 @@ def init_train_state(
 
     logging.info(f"Loading weights using weight loader: {config.weight_loader}")
     logging.info(f"Model config: action_dim={config.model.action_dim}, action_horizon={config.model.action_horizon}")
+    pdb.set_trace()
     partial_params = _load_weights_and_validate(config.weight_loader, train_state_shape.params.to_pure_dict())
     logging.info(f"Successfully loaded weights")
     replicated_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
@@ -229,6 +231,8 @@ def main(config: _config.TrainConfig):
     batch = next(data_iter)
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
 
+    pdb.set_trace()  # Set a breakpoint here to inspect the batch if needed.
+
     # Log images from first batch to sanity check.
     images_to_log = [
         wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
@@ -236,6 +240,8 @@ def main(config: _config.TrainConfig):
     ]
     wandb.log({"camera_views": images_to_log}, step=0)
     logging.info(f"Logged {len(images_to_log)} camera views from the first batch.")
+
+    pdb.set_trace()  # Set a breakpoint here to inspect the batch if needed.
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
