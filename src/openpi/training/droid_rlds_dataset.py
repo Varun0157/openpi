@@ -53,12 +53,6 @@ class DroidRldsDataset:
         if "TF_FORCE_GPU_ALLOW_GROWTH" not in os.environ:
             os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 
-        # attempted fix 2: properly configure num_parallel_reads and calls
-        if num_parallel_reads == -1:
-            num_parallel_reads = tf.data.AUTOTUNE
-        if num_parallel_calls == -1:
-            num_parallel_calls = tf.data.AUTOTUNE
-
         builder = tfds.builder("droid", data_dir=data_dir)
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
 
@@ -68,9 +62,6 @@ class DroidRldsDataset:
                 traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
             )
         )
-
-        # attempted fix 3: add prefetching before repeat to avoid
-        dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
         # Repeat dataset so we never run out of data.
         dataset = dataset.repeat()
