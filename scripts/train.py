@@ -122,7 +122,7 @@ def init_train_state(
 
     logging.info(f"Loading weights using weight loader: {config.weight_loader}")
     logging.info(f"Model config: action_dim={config.model.action_dim}, action_horizon={config.model.action_horizon}")
-    pdb.set_trace()
+    # pdb.set_trace()
     partial_params = _load_weights_and_validate(config.weight_loader, train_state_shape.params.to_pure_dict())
     logging.info(f"Successfully loaded weights")
     replicated_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
