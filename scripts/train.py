@@ -231,8 +231,6 @@ def main(config: _config.TrainConfig):
     batch = next(data_iter)
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
 
-    pdb.set_trace()  # Set a breakpoint here to inspect the batch if needed.
-
     # Log images from first batch to sanity check.
     images_to_log = [
         wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
@@ -240,8 +238,6 @@ def main(config: _config.TrainConfig):
     ]
     wandb.log({"camera_views": images_to_log}, step=0)
     logging.info(f"Logged {len(images_to_log)} camera views from the first batch.")
-
-    pdb.set_trace()  # Set a breakpoint here to inspect the batch if needed.
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
