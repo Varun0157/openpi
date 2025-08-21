@@ -736,7 +736,8 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_fast_base/params"),
         num_train_steps=10_000,  # 100k steps should be sufficient, takes ~2 days on 8x H100s
-        batch_size=1,
+        batch_size=256,
+        save_interval=10_000,
         num_workers=0,  # Important: RLDS DataLoader requires num_workers=0, handles multi-processing internally
         freeze_filter=pi0_fast.Pi0FASTConfig(
             action_dim=8, action_horizon=16, max_token_len=180, paligemma_variant="gemma_2b_lora"
