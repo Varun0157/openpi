@@ -83,7 +83,13 @@ def save_state(
         "train_state": train_state,
         "params": {"params": params},
     }
+    import pdb
+
+    pdb.set_trace()
+
     checkpoint_manager.save(step, items)
+
+    pdb.set_trace()
 
 
 def restore_state(
