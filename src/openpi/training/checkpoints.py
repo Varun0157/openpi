@@ -49,7 +49,10 @@ def initialize_checkpoint_dir(
             keep_period=keep_period,
             create=False,
             async_options=ocp.AsyncOptions(timeout_secs=7200),
-            single_host_load_and_broadcast=True,
+            multiprocessing_options=ocp.MultiprocessingOptions(
+                primary_host=0,  # Default primary
+                active_processes={0},  # Limit to process 0; expand as needed
+            ),
         ),
     )
 
