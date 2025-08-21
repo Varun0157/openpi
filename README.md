@@ -41,7 +41,7 @@ git submodule update --init --recursive
 We use [uv](https://docs.astral.sh/uv/) to manage Python dependencies. See the [uv installation instructions](https://docs.astral.sh/uv/getting-started/installation/) to set it up. Once uv is installed, run the following to set up the environment:
 
 ```bash
-GIT_LFS_SKIP_SMUDGE=1 uv sync
+GIT_LFS_SKIP_SMUDGE=1 uv sync --group rlds
 GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 ```
 
