@@ -249,7 +249,7 @@ class PaliGemmaWeightLoader(WeightLoader):
         return _merge_params(loaded_params, params, missing_regex=".*")
 
 
-@memory_profile("merge_params", sample_interval=0.005)
+@memory_profile("merge_params: original", sample_interval=0.005)
 def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex: str) -> at.Params:
     """Merges the loaded parameters with the reference parameters.
 
@@ -268,8 +268,8 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
     result = {}
     for k, v in flat_loaded.items():
         if k in flat_ref:
-            result[k] = v.astype(flat_ref[k].dtype) if v.dtype != flat_ref[k].dtype else v
-            # result[k] = v.astype(flat_ref[k].dtype)
+            # result[k] = v.astype(flat_ref[k].dtype) if v.dtype != flat_ref[k].dtype else v
+            result[k] = v.astype(flat_ref[k].dtype)
 
     # flat_loaded.clear()
 
