@@ -132,24 +132,6 @@ def main(config_name: str, max_frames: int | None = None):
     stats = {key: normalize.RunningStats() for key in keys}
 
     logging.info(f"Starting iteration over {num_batches} batches...")
-    print(f"=== ABOUT TO START ITERATION OVER {num_batches} BATCHES ===")
-    
-    # Test if we can get the iterator at all
-    print("=== CREATING ITERATOR ===")
-    data_iter = iter(data_loader)
-    print("=== ITERATOR CREATED ===")
-    
-    # Test if we can get the first batch
-    print("=== GETTING FIRST BATCH ===")
-    try:
-        first_batch = next(data_iter)
-        print("=== FIRST BATCH RETRIEVED SUCCESSFULLY ===")
-        print(f"First batch keys: {list(first_batch.keys())}")
-    except Exception as e:
-        print(f"=== ERROR GETTING FIRST BATCH: {e} ===")
-        raise
-    
-    print("=== STARTING TQDM ITERATION ===")
     for batch_idx, batch in enumerate(tqdm.tqdm(data_loader, total=num_batches, desc="Computing stats")):
         if batch_idx == 0:
             logging.info(f"First batch received! Keys: {list(batch.keys())}")
