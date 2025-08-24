@@ -96,11 +96,9 @@ class DroidRldsDataset:
             print("traj stuff: ", traj.keys())
             print("Observations: ", traj["observation"].keys())
             exterior_img = traj["observation"]["image"]
-            wrist_img = traj["observation"]["wrist_image_left"]
+            wrist_img = tf.zeros_like(exterior_img)
             # Randomly sample one of the three language instructions
-            instruction = tf.random.shuffle(
-                [traj["language_instruction"], traj["language_instruction_2"], traj["language_instruction_3"]]
-            )[0]
+            instruction = traj["language_instruction"]
 
             return {
                 "actions": actions,
