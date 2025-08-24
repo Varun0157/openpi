@@ -64,6 +64,7 @@ class DroidRldsDataset:
         def restructure(traj):
             """Reformat observation and action keys, sample language instruction."""
             # Important: we use joint *position* action space -- easier to simulate!
+
             actions = tf.concat(
                 (
                     (
@@ -75,6 +76,9 @@ class DroidRldsDataset:
                 ),
                 axis=-1,
             )
+            print("Action shape: ", traj["action"].shape)
+            print("Actions shape: ", actions.shape)
+
             # Randomly samples one of the two exterior images in DROID during training (we only train with one at a time).
             # Note: the "left" refers to the left camera in the stereo pair, we only train on the left camera.
             exterior_img = tf.cond(
