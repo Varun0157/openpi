@@ -51,8 +51,10 @@ class DroidRldsDataset:
         logging.info("All imports complete")
 
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
+        print("Configuring TensorFlow...")
         logging.info("Configuring TensorFlow...")
         tf.config.set_visible_devices([], "GPU")
+        print("TensorFlow configured")
         logging.info("TensorFlow configured")
 
         # # attempted fix
@@ -61,11 +63,18 @@ class DroidRldsDataset:
 
         # gc.collect()
 
+        print(f"Loading DROID dataset from: {data_dir}")
         logging.info(f"Loading DROID dataset from: {data_dir}")
+        print("Creating TFDS builder...")
         builder = tfds.builder("droid", data_dir=data_dir)
+        print("TFDS builder created")
+        logging.info(f"TFDS builder created")
+        print(f"TFDS builder info: {builder.info}")
         logging.info(f"TFDS builder info: {builder.info}")
         
+        print("Creating DLataset from RLDS...")
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
+        print("DLataset created successfully")
         logging.info("Successfully created DLataset from RLDS")
 
         # Filter out any unsuccessful trajectories -- we use the file name to check this
