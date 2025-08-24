@@ -12,8 +12,7 @@ def make_droid_example() -> dict:
     return {
         "observation/exterior_image_1_left": np.random.randint(256, size=(224, 224, 3), dtype=np.uint8),
         "observation/wrist_image_left": np.random.randint(256, size=(224, 224, 3), dtype=np.uint8),
-        "observation/joint_position": np.random.rand(7),
-        "observation/gripper_position": np.random.rand(1),
+        "observation/state": np.random.rand(8),
         "prompt": "do something",
     }
 
@@ -36,7 +35,7 @@ class DroidInputs(transforms.DataTransformFn):
     model_type: _model.ModelType = _model.ModelType.PI0
 
     def __call__(self, data: dict) -> dict:
-        state = np.concatenate([data["observation/joint_position"], data["observation/gripper_position"]])
+        state = data["observation/state"]
         state = transforms.pad_to_dim(state, self.action_dim)
 
         # Possibly need to parse images to uint8 (H,W,C) since LeRobot automatically

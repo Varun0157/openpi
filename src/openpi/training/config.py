@@ -352,8 +352,7 @@ class RLDSDroidDataConfig(DataConfigFactory):
                     {
                         "observation/exterior_image_1_left": "observation/image",
                         "observation/wrist_image_left": "observation/wrist_image",
-                        "observation/joint_position": "observation/joint_position",
-                        "observation/gripper_position": "observation/gripper_position",
+                        "observation/state": "observation/state",
                         "actions": "actions",
                         "prompt": "prompt",
                     }
