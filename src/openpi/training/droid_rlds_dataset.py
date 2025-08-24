@@ -107,7 +107,6 @@ class DroidRldsDataset:
                     "wrist_image": wrist_img,
                     # "joint_position": traj["observation"]["joint_position"],
                     # "gripper_position": traj["observation"]["gripper_position"],
-                    "state": traj["observation"]["state"],
                 },
                 "prompt": instruction,
             }
