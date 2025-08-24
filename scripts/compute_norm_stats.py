@@ -66,7 +66,6 @@ def create_rlds_dataloader(
     batch_size: int,
     max_frames: int | None = None,
 ) -> tuple[_data_loader.Dataset, int]:
-    print(f"=== CREATE_RLDS_DATALOADER CALLED ===")
     logging.info(f"Creating RLDS dataset with data_dir: {data_config.rlds_data_dir}")
     logging.info(f"Action horizon: {action_horizon}, batch_size: {batch_size}")
     
@@ -103,7 +102,6 @@ def create_rlds_dataloader(
 
 
 def main(config_name: str, max_frames: int | None = None):
-    print(f"=== MAIN FUNCTION CALLED with config: {config_name} ===")  # Use print to ensure it shows up
     logging.info(f"Starting compute_norm_stats for config: {config_name}")
     
     logging.info("Loading config...")
@@ -159,6 +157,4 @@ def main(config_name: str, max_frames: int | None = None):
 
 
 if __name__ == "__main__":
-    print("=== STARTING SCRIPT ===")  # Use print to ensure it shows up
-    logging.info("=== STARTING SCRIPT ===")
     tyro.cli(main)
