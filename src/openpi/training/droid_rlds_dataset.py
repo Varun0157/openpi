@@ -51,12 +51,12 @@ class DroidRldsDataset:
         builder = tfds.builder("droid", data_dir=data_dir)
         dataset = dl.DLataset.from_rlds(builder, split="train", shuffle=shuffle, num_parallel_reads=num_parallel_reads)
 
-        # Filter out any unsuccessful trajectories -- we use the file name to check this
-        dataset = dataset.filter(
-            lambda traj: tf.strings.regex_full_match(
-                traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
-            )
-        )
+        # Skip success filter for custom datasets - your dataset likely doesn't use "success" filename convention
+        # dataset = dataset.filter(
+        #     lambda traj: tf.strings.regex_full_match(
+        #         traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
+        #     )
+        # )
 
         # Repeat dataset so we never run out of data.
         dataset = dataset.repeat()
