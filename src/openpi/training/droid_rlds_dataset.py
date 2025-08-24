@@ -80,7 +80,7 @@ class DroidRldsDataset:
             # print("joint position shape: ", traj["action_dict"]["joint_position"].shape)
             # print("gripper position shape: ", traj["action_dict"]["gripper_position"].shape)
 
-            actions = tf.concat(traj["actions"], axis=-1)
+            actions = traj["action"]
             print("Actions shape: ", actions.shape)
 
             # Randomly samples one of the two exterior images in DROID during training (we only train with one at a time).
