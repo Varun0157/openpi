@@ -81,8 +81,6 @@ class DroidRldsDataset:
             print("gripper position shape: ", traj["action_dict"]["gripper_position"].shape)
             print("Actions shape: ", actions.shape)
 
-            actions = tf.concat(traj["actions"], axis=-1)
-
             # Randomly samples one of the two exterior images in DROID during training (we only train with one at a time).
             # Note: the "left" refers to the left camera in the stereo pair, we only train on the left camera.
             exterior_img = tf.cond(
