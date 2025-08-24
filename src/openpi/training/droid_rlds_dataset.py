@@ -64,37 +64,23 @@ class DroidRldsDataset:
         def restructure(traj):
             """Reformat observation and action keys, sample language instruction."""
             # Important: we use joint *position* action space -- easier to simulate!
+
+            # Create actions from traj["action"] with extra column of zeros
             actions = tf.concat(
-                (
-                    (
-                        traj["action_dict"]["joint_position"]
-                        if action_space == DroidActionSpace.JOINT_POSITION
-                        else traj["action_dict"]["joint_velocity"]
-                    ),
-                    traj["action_dict"]["gripper_position"],
-                ),
+                [traj["action"], tf.zeros_like(traj["action"][..., :1])],
                 axis=-1,
             )
-            # Randomly samples one of the two exterior images in DROID during training (we only train with one at a time).
-            # Note: the "left" refers to the left camera in the stereo pair, we only train on the left camera.
-            exterior_img = tf.cond(
-                tf.random.uniform(shape=[]) > 0.5,
-                lambda: traj["observation"]["exterior_image_1_left"],
-                lambda: traj["observation"]["exterior_image_2_left"],
-            )
-            wrist_img = traj["observation"]["wrist_image_left"]
-            # Randomly sample one of the three language instructions
-            instruction = tf.random.shuffle(
-                [traj["language_instruction"], traj["language_instruction_2"], traj["language_instruction_3"]]
-            )[0]
+
+            exterior_img = traj["observation"]["image"]
+            wrist_img = tf.zeros_like(exterior_img)
+            instruction = traj["language_instruction"]
 
             return {
                 "actions": actions,
                 "observation": {
                     "image": exterior_img,
                     "wrist_image": wrist_img,
-                    "joint_position": traj["observation"]["joint_position"],
-                    "gripper_position": traj["observation"]["gripper_position"],
+                    "state": traj["observation"]["state"],
                 },
                 "prompt": instruction,
             }
@@ -143,9 +129,6 @@ class DroidRldsDataset:
         def decode_images(traj):
             traj["observation"]["image"] = tf.io.decode_image(
                 traj["observation"]["image"], expand_animations=False, dtype=tf.uint8
-            )
-            traj["observation"]["wrist_image"] = tf.io.decode_image(
-                traj["observation"]["wrist_image"], expand_animations=False, dtype=tf.uint8
             )
             return traj
 
