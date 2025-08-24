@@ -40,8 +40,8 @@ class DroidInputs(transforms.DataTransformFn):
 
         # Possibly need to parse images to uint8 (H,W,C) since LeRobot automatically
         # stores as float32 (C,H,W), gets skipped for policy inference
-        base_image = _parse_image(data["observation/exterior_image_1_left"])
-        wrist_image = _parse_image(data["observation/wrist_image_left"])
+        base_image = _parse_image(data["observation/image"])
+        wrist_image = np.zeros_like(base_image)
 
         match self.model_type:
             case _model.ModelType.PI0:
