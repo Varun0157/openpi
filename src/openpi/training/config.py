@@ -733,7 +733,7 @@ _CONFIGS = [
             action_space=droid_rlds_dataset.DroidActionSpace.JOINT_POSITION,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_fast_base/params"),
-        num_train_steps=500,  # 100k steps should be sufficient, takes ~2 days on 8x H100s
+        num_train_steps=1000,  # 100k steps should be sufficient, takes ~2 days on 8x H100s
         batch_size=64,
         save_interval=250,
         num_workers=0,  # Important: RLDS DataLoader requires num_workers=0, handles multi-processing internally
