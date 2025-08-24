@@ -88,12 +88,11 @@ class DroidRldsDataset:
 
             # Randomly samples one of the two exterior images in DROID during training (we only train with one at a time).
             # Note: the "left" refers to the left camera in the stereo pair, we only train on the left camera.
-            # exterior_img = tf.cond(
-            #     tf.random.uniform(shape=[]) > 0.5,
-            #     lambda: traj["observation"]["exterior_image_1_left"],
-            #     lambda: traj["observation"]["exterior_image_2_left"],
-            # )
-            exterior_img = traj["observation"]["exterior_image_2_left"]
+            exterior_img = tf.cond(
+                tf.random.uniform(shape=[]) > 0.5,
+                lambda: traj["observation"]["exterior_image_1_left"],
+                lambda: traj["observation"]["exterior_image_2_left"],
+            )
             wrist_img = traj["observation"]["wrist_image_left"]
             # Randomly sample one of the three language instructions
             instruction = tf.random.shuffle(
