@@ -78,14 +78,12 @@ class DroidRldsDataset:
         logging.info("Successfully created DLataset from RLDS")
 
         # Filter out any unsuccessful trajectories -- we use the file name to check this
-        print("Applying success filter to trajectories")
         logging.info("Applying success filter to trajectories")
         dataset = dataset.filter(
             lambda traj: tf.strings.regex_full_match(
                 traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
             )
         )
-        print("Success filter applied")
         logging.info("Success filter applied")
 
         # Repeat dataset so we never run out of data.
@@ -94,28 +92,20 @@ class DroidRldsDataset:
         def restructure(traj):
             """Reformat observation and action keys, sample language instruction."""
             # Important: we use joint *position* action space -- easier to simulate!
-            
-            print("=== RESTRUCTURE FUNCTION CALLED ===")
-            
-            # Log trajectory keys for debugging
-            print(f"Trajectory keys: {list(traj.keys())}")
-            if "action" in traj:
-                print(f"Action shape: {tf.shape(traj['action'])}")
-            else:
-                print("ERROR: No 'action' key in trajectory!")
-                
-            if "observation" in traj:
-                print(f"Observation keys: {list(traj['observation'].keys())}")
-            else:
-                print("ERROR: No 'observation' key in trajectory!")
 
-            print("Creating actions with extra zero column...")
+            # Log trajectory keys for debugging
+            if tf.executing_eagerly():
+                logging.info(f"Trajectory keys: {list(traj.keys())}")
+                if "action" in traj:
+                    logging.info(f"Action shape: {tf.shape(traj['action'])}")
+                if "observation" in traj:
+                    logging.info(f"Observation keys: {list(traj['observation'].keys())}")
+
             # Create actions from traj["action"] with extra column of zeros
             actions = tf.concat(
                 [traj["action"], tf.zeros_like(traj["action"][..., :1])],
                 axis=-1,
             )
-            print("Actions created successfully")
 
             exterior_img = traj["observation"]["image"]
             wrist_img = tf.zeros_like(exterior_img)
