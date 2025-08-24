@@ -35,13 +35,20 @@ class DroidRldsDataset:
         num_parallel_reads: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
         num_parallel_calls: int = -1,  # -1 == tf.data.AUTOTUNE -- hack to not import tf at top level
     ):
+        logging.info("=== DroidRldsDataset.__init__ STARTED ===")
         # Import tensorflow here to not make it mandatory in case RLDS data loader is not used.
+        logging.info("Importing dlimp...")
         import dlimp as dl
+        logging.info("Importing tensorflow...")
         import tensorflow as tf
+        logging.info("Importing tensorflow_datasets...")
         import tensorflow_datasets as tfds
+        logging.info("All imports complete")
 
         # Configure Tensorflow with *no GPU devices* (to prevent clobber with PyTorch / JAX)
+        logging.info("Configuring TensorFlow...")
         tf.config.set_visible_devices([], "GPU")
+        logging.info("TensorFlow configured")
 
         # # attempted fix
         # tf.config.threading.set_inter_op_parallelism_threads(2)
