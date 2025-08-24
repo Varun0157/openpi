@@ -93,7 +93,6 @@ class DroidRldsDataset:
             #     lambda: traj["observation"]["exterior_image_1_left"],
             #     lambda: traj["observation"]["exterior_image_2_left"],
             # )
-            print("Observations: ", traj["observation"].keys())
             exterior_img = traj["observation"]["image"]
             wrist_img = traj["observation"]["wrist_image_left"]
             # Randomly sample one of the three language instructions
