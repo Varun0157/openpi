@@ -77,31 +77,37 @@ class DroidRldsDataset:
         print("DLataset created successfully")
         logging.info("Successfully created DLataset from RLDS")
 
-        # Filter out any unsuccessful trajectories -- we use the file name to check this
-        print("Applying success filter to trajectories")
-        logging.info("Applying success filter to trajectories")
-        
-        # First, let's see what file paths we actually have
-        def check_file_path(traj):
-            file_path = traj["traj_metadata"]["episode_metadata"]["file_path"][0]
-            print(f"=== FILE PATH: {file_path} ===")
-            contains_success = tf.strings.regex_full_match(file_path, ".*success.*")
-            print(f"=== CONTAINS 'success': {contains_success} ===")
-            return contains_success
-        
-        dataset = dataset.filter(check_file_path)
-        print("Success filter applied")
-        logging.info("Success filter applied")
-        
-        # Check if we have any data left after filtering
-        print("=== CHECKING IF ANY TRAJECTORIES REMAIN ===")
+        # Check how many trajectories we have BEFORE filtering
+        print("=== CHECKING TRAJECTORIES BEFORE FILTERING ===")
         try:
-            # Try to get one trajectory to see if any remain
-            sample_traj = next(iter(dataset.take(1)))
-            print("✅ At least one trajectory remains after filtering")
+            sample_traj_before = next(iter(dataset.take(1)))
+            print("✅ Dataset contains trajectories before filtering")
+            print(f"Sample trajectory keys: {list(sample_traj_before.keys())}")
+            if "traj_metadata" in sample_traj_before and "episode_metadata" in sample_traj_before["traj_metadata"]:
+                file_path = sample_traj_before["traj_metadata"]["episode_metadata"]["file_path"][0]
+                print(f"Sample file path: {file_path}")
+            else:
+                print("No file_path metadata found")
         except Exception as e:
-            print(f"❌ NO TRAJECTORIES REMAIN AFTER FILTERING: {e}")
-            print("This means all trajectories were filtered out by the success filter!")
+            print(f"❌ NO TRAJECTORIES BEFORE FILTERING: {e}")
+
+        # TEMPORARILY DISABLE SUCCESS FILTER FOR CUSTOM DATASET
+        print("⚠️  SKIPPING SUCCESS FILTER FOR CUSTOM DATASET")
+        logging.info("SKIPPING SUCCESS FILTER FOR CUSTOM DATASET")
+        
+        # For your custom dataset, we'll skip the success filter since your filenames 
+        # probably don't contain "success" in them. For DROID, this filter was used
+        # to only include successful demonstrations.
+        
+        # Original filter code (commented out):
+        # dataset = dataset.filter(
+        #     lambda traj: tf.strings.regex_full_match(
+        #         traj["traj_metadata"]["episode_metadata"]["file_path"][0], ".*success.*"
+        #     )
+        # )
+        
+        print("Success filter skipped - using all trajectories")
+        logging.info("Success filter skipped - using all trajectories")
         
         # Repeat dataset so we never run out of data.
         dataset = dataset.repeat()
