@@ -117,14 +117,10 @@ class DroidRldsDataset:
             )
             print("Actions created successfully")
 
-            print("Getting exterior image...")
             exterior_img = traj["observation"]["image"]
-            print("Creating wrist image...")
             wrist_img = tf.zeros_like(exterior_img)
-            print("Getting instruction...")
             instruction = traj["language_instruction"]
-            
-            print("Returning restructured trajectory...")
+
             return {
                 "actions": actions,
                 "observation": {
@@ -135,17 +131,13 @@ class DroidRldsDataset:
                 "prompt": instruction,
             }
 
-        print("Applying restructure transform")
         logging.info("Applying restructure transform")
         dataset = dataset.traj_map(restructure, num_parallel_calls)
-        print("Restructure transform applied")
         logging.info("Restructure transform applied")
 
         def chunk_actions(traj):
             """Splits episode into action chunks."""
-            print("=== CHUNK_ACTIONS FUNCTION CALLED ===")
             traj_len = tf.shape(traj["actions"])[0]
-            print(f"Trajectory length: {traj_len}")
 
             # For each step in the trajectory, construct indices for the next n actions
             action_chunk_indices = tf.broadcast_to(
@@ -161,22 +153,16 @@ class DroidRldsDataset:
             action_chunk_indices = tf.minimum(action_chunk_indices, traj_len - 1)
 
             # Gather the actions for each chunk
-            print("Gathering action chunks...")
             traj["actions"] = tf.gather(traj["actions"], action_chunk_indices)
-            print("Action chunking complete")
             return traj
 
-        print("Applying action chunking")
         logging.info("Applying action chunking")
         dataset = dataset.traj_map(chunk_actions, num_parallel_calls)
-        print("Action chunking applied")
         logging.info("Action chunking applied")
 
         # Flatten: map from trajectory dataset to dataset of individual action chunks
-        print("Flattening dataset")
         logging.info("Flattening dataset")
         dataset = dataset.flatten(num_parallel_calls=num_parallel_calls)
-        print("Dataset flattened")
         logging.info("Dataset flattened")
 
         # Filter out frames where actions are idle. Must be done after flattening, as filter should apply per-frame.
