@@ -350,8 +350,7 @@ class RLDSDroidDataConfig(DataConfigFactory):
             inputs=[
                 _transforms.RepackTransform(
                     {
-                        "observation/exterior_image_1_left": "observation/image",
-                        "observation/wrist_image_left": "observation/wrist_image",
+                        "observation/image": "observation/image",
                         "observation/state": "observation/state",
                         "actions": "actions",
                         "prompt": "prompt",
