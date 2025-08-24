@@ -65,23 +65,23 @@ class DroidRldsDataset:
             """Reformat observation and action keys, sample language instruction."""
             # Important: we use joint *position* action space -- easier to simulate!
 
-            actions = tf.concat(
-                (
-                    (
-                        traj["action_dict"]["joint_position"]
-                        if action_space == DroidActionSpace.JOINT_POSITION
-                        else traj["action_dict"]["joint_velocity"]
-                    ),
-                    traj["action_dict"]["gripper_position"],
-                ),
-                axis=-1,
-            )
-            print("Action shape: ", traj["action"].shape)
-            print("joint position shape: ", traj["action_dict"]["joint_position"].shape)
-            print("gripper position shape: ", traj["action_dict"]["gripper_position"].shape)
-            print("Actions shape: ", actions.shape)
+            # actions = tf.concat(
+            #     (
+            #         (
+            #             traj["action_dict"]["joint_position"]
+            #             if action_space == DroidActionSpace.JOINT_POSITION
+            #             else traj["action_dict"]["joint_velocity"]
+            #         ),
+            #         traj["action_dict"]["gripper_position"],
+            #     ),
+            #     axis=-1,
+            # )
+            # print("Action shape: ", traj["action"].shape)
+            # print("joint position shape: ", traj["action_dict"]["joint_position"].shape)
+            # print("gripper position shape: ", traj["action_dict"]["gripper_position"].shape)
 
             actions = tf.concat(traj["actions"], axis=-1)
+            print("Actions shape: ", actions.shape)
 
             # Randomly samples one of the two exterior images in DROID during training (we only train with one at a time).
             # Note: the "left" refers to the left camera in the stereo pair, we only train on the left camera.
