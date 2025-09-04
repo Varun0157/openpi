@@ -32,7 +32,7 @@ class InferenceConfig:
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/lite-6/lite_6.urdf"
     end_effector_link_index: int = 6
 
-    max_timesteps: int = 100
+    max_timesteps: int = 1000
     action_horizon: int = 16  # Actions are chunked, execute multiple steps per inference (matches training config)
 
     save_images: bool = True
