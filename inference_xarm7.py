@@ -88,13 +88,10 @@ class XArm7InferenceEnv:
         self.camera_position = np.array(self.config.camera_position)
         self.camera_orientation = p.getQuaternionFromEuler(self.config.camera_orientation_euler)
 
-        self.camera_intrinsics = np.array([
-            [522.6506958007812, 0.0, 639.2378540039062],
-            [0.0, 522.6506958007812, 352.5005798339844],
-            [0.0, 0.0, 1.0]
-        ])
+        self.camera_intrinsics = np.array(
+            [[522.6506958007812, 0.0, 639.2378540039062], [0.0, 522.6506958007812, 352.5005798339844], [0.0, 0.0, 1.0]]
+        )
 
-        # Compute projection matrix for PyBullet
         self.projection_matrix = self._compute_projection_matrix()
 
     def _compute_projection_matrix(self):
