@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
-"""
-Inference script for OpenPI policy on xARM7 robot arm in PyBullet.
-"""
-
+import dataclasses
 import os
 import time
-import dataclasses
-import numpy as np
+
 import cv2
+import numpy as np
+from PIL import Image
 import pybullet as p
 import pybullet_data
-from PIL import Image
 from scipy.spatial.transform import Rotation as R
 
 from openpi.policies import policy_config as _policy_config
@@ -71,7 +67,6 @@ class XArm7InferenceEnv:
         """Load the xARM7 robot URDF."""
         self.robot_id = p.loadURDF(self.config.urdf_path, [0, 0, 0], useFixedBase=True)
 
-        # Get joint information
         self.num_joints = p.getNumJoints(self.robot_id)
         self.joint_indices = list(range(self.num_joints))
 
@@ -87,8 +82,9 @@ class XArm7InferenceEnv:
             0.058147608614682836,
         ]
         for i, angle in enumerate(initial_state):
-            if i < self.num_joints:
-                p.resetJointState(self.robot_id, i, angle)
+            if i >= self.num_joints:
+                break
+            p.resetJointState(self.robot_id, i, angle)
 
     def setup_camera(self):
         """Setup camera parameters for image capture."""
