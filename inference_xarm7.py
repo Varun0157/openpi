@@ -96,14 +96,40 @@ class XArm7InferenceEnv:
         self.camera_position = np.array(self.config.camera_position)
         self.camera_orientation = p.getQuaternionFromEuler(self.config.camera_orientation_euler)
 
-        self.camera_intrinsics = np.array(
-            [[522.6506958007812, 0.0, 639.2378540039062], [0.0, 522.6506958007812, 352.5005798339844], [0.0, 0.0, 1.0]]
-        )
-
+        # Use the original calibrated intrinsics and scale them to target size
+        # This matches the approach in Embodiment-Codes-RRC
+        K_original = np.array([
+            [522.6506958007812, 0.0, 639.2378540039062],
+            [0.0, 522.6506958007812, 352.5005798339844],
+            [0.0, 0.0, 1.0]
+        ])
+        
+        # Scale intrinsics from original calibration size to target render size
+        # You'll need to provide the original calibration image size
+        original_size = (720, 1280)  # (height, width) - update this to match your calibration
+        target_size = (self.config.image_height, self.config.image_width)
+        
+        self.camera_intrinsics = self._scale_intrinsics(K_original, original_size, target_size)
         self.projection_matrix = self._compute_projection_matrix()
 
+    def _scale_intrinsics(self, K, old_dims, new_dims):
+        """Scale camera intrinsics from one image size to another."""
+        old_height, old_width = old_dims
+        new_height, new_width = new_dims
+        
+        scale_w = new_width / old_width
+        scale_h = new_height / old_height
+        
+        K_scaled = K.copy()
+        K_scaled[0, 0] *= scale_w  # Scale fx
+        K_scaled[1, 1] *= scale_h  # Scale fy
+        K_scaled[0, 2] *= scale_w  # Scale cx
+        K_scaled[1, 2] *= scale_h  # Scale cy
+        
+        return K_scaled
+
     def _compute_projection_matrix(self):
-        """Convert camera intrinsics to PyBullet projection matrix."""
+        """Convert camera intrinsics to PyBullet projection matrix (matching Embodiment-Codes-RRC approach)."""
         near, far = 0.1, 3.1
         w, h = self.config.image_width, self.config.image_height
 
@@ -112,14 +138,14 @@ class XArm7InferenceEnv:
         cx = self.camera_intrinsics[0, 2]
         cy = self.camera_intrinsics[1, 2]
 
-        a = (near + far) / (near - far)
-        b = 2 * near * far / (near - far)
+        A = (near + far) / (near - far)
+        B = 2 * near * far / (near - far)
 
         projection_matrix = [
-            [2 * fx / w, 0, (w - 2 * cx) / w, 0],
-            [0, 2 * fy / h, (2 * cy - h) / h, 0],
-            [0, 0, a, b],
-            [0, 0, -1, 0],
+            [2/w * fx,  0,          (w - 2*cx)/w,  0],
+            [0,         2/h * fy,   (2*cy - h)/h,  0],
+            [0,         0,          A,             B],
+            [0,         0,          -1,            0]
         ]
 
         return np.array(projection_matrix).T.reshape(16).tolist()
@@ -203,11 +229,6 @@ class XArm7InferenceEnv:
 
 def create_policy_input(image, robot_state, prompt):
     """Create input dictionary for the policy."""
-    # The DROID RLDS config expects these specific keys based on the repack transform:
-    # "observation/image": "observation/image"
-    # "observation/state": "observation/state"
-    # "prompt": "prompt"
-
     # Resize image to expected size (224x224 for DROID policy)
     image_resized = cv2.resize(image, (224, 224))
     state = np.concatenate([robot_state, [0.0]])[:8] if len(robot_state) < 8 else robot_state[:8]
@@ -222,7 +243,7 @@ def create_policy_input(image, robot_state, prompt):
 def main():
     # Configuration
     config = InferenceConfig(
-        checkpoint_dir="checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499",  # Update this!
+        checkpoint_dir="checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499",
         use_gui=False,  # Set to False for headless server mode
         save_images=True,
     )
@@ -246,9 +267,7 @@ def main():
 
     # Inference loop
     print("Starting inference loop...")
-    prompt = (
-        "Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)"  # Default prompt
-    )
+    prompt = "Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)"
 
     # Track action execution
     actions_from_chunk = []
