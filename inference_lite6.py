@@ -29,8 +29,8 @@ class InferenceConfig:
     # Camera settings
     image_width: int = 320
     image_height: int = 180
-    camera_position: list = [0.5, 0.0, 0.6]  # Adjust based on your setup
-    camera_orientation_euler: list = [-1.95, -0.02, -1.57]  # radians
+    camera_position: list = dataclasses.field(default_factory=lambda: [0.5, 0.0, 0.6])  # Adjust based on your setup
+    camera_orientation_euler: list = dataclasses.field(default_factory=lambda: [-1.95, -0.02, -1.57])  # radians
 
     # Robot settings
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/lite-6/lite_6.urdf"
