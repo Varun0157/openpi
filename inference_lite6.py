@@ -29,8 +29,12 @@ class InferenceConfig:
     # Camera settings
     image_width: int = 320
     image_height: int = 180
-    camera_position: list = dataclasses.field(default_factory=lambda: [0.5, 0.0, 0.6])  # Adjust based on your setup
-    camera_orientation_euler: list = dataclasses.field(default_factory=lambda: [-1.95, -0.02, -1.57])  # radians
+    camera_position: list = dataclasses.field(
+        default_factory=lambda: [0.085036, 0.563473, 0.416859]
+    )  # Adjust based on your setup
+    camera_orientation_euler: list = dataclasses.field(
+        default_factory=lambda: [-1.95721, -0.0233935, -2.11812]
+    )  # radians
 
     # Robot settings
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/lite-6/lite_6.urdf"
@@ -94,10 +98,36 @@ class Lite6InferenceEnv:
         # Compute projection matrix for PyBullet
         self.projection_matrix = self._compute_projection_matrix()
 
+    def update_intrinsic_matrix(self, k, old_dims, new_dims):
+        """
+        Update the intrinsic matrix K based on new image dimensions.
+        """
+
+        # NOTE :  Mention the site later !
+
+        old_height, old_width = old_dims
+        new_height, new_width = new_dims
+
+        scale_w = new_width / old_width
+        scale_h = new_height / old_height
+
+        k_updated = k.copy()
+        k_updated[0, 0] *= scale_w  # Scale fx
+        k_updated[1, 1] *= scale_h  # Scale fy
+        k_updated[0, 2] *= scale_w  # Scale cx
+        k_updated[1, 2] *= scale_h  # Scale cy
+
+        return k_updated
+
     def _compute_projection_matrix(self):
         """Convert camera intrinsics to PyBullet projection matrix."""
-        near, far = 0.1, 3.0
+        near, far = 0.1, 3.1
         w, h = self.config.image_width, self.config.image_height
+
+        k_old = np.array([[524.24609375, 0.0, 639.77758789], [0.0, 524.24609375, 370.27789307], [0.0, 0.0, 1.0]])
+        old_dims = (720, 1280)
+
+        k = self.update_intrinsic_matrix(k_old, old_dims, (h, w))
 
         fx = self.camera_intrinsics[0, 0]
         fy = self.camera_intrinsics[1, 1]
