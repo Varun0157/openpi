@@ -36,7 +36,7 @@ class InferenceConfig:
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/src_xarm/airobot/urdfs/xarm7_robot.urdf"
     end_effector_link_index: int = 7
 
-    max_timesteps: int = 1000
+    max_timesteps: int = 10
     action_horizon: int = 16
 
     save_images: bool = True
@@ -177,37 +177,31 @@ class XArm7InferenceEnv:
 
     def execute_action(self, action):
         """Execute action on the robot (joint position control)."""
-        # The policy outputs 8-dimensional actions (7 joint deltas + 1 gripper absolute)
-        # For xARM7, we use all 7 joint dimensions (joint deltas)
-        if len(action) >= 7:
-            joint_deltas = action[:7]  # Take first 7 dimensions for joint deltas
-        else:
-            raise Exception(f"Action has insufficient dimensions: {len(action)} < 7")
-
-        # Get current joint positions
-        current_joint_positions = self.get_robot_state()
-
-        # Convert delta actions to absolute positions
-        # First 7 dimensions are deltas, add to current positions
-        target_joint_positions = current_joint_positions[: len(joint_deltas)] + joint_deltas
-
-        # Ensure we only control the available joints
-        target_joint_positions = target_joint_positions[: self.num_joints]
-        joint_indices_to_control = self.joint_indices[: len(target_joint_positions)]
-
-        # Set joint position targets
-        p.setJointMotorControlArray(
-            bodyUniqueId=self.robot_id,
-            jointIndices=joint_indices_to_control,
-            controlMode=p.POSITION_CONTROL,
-            targetPositions=target_joint_positions,
-        )
-
-        # Step simulation
-        steps_per_action = int(240.0 / self.config.control_frequency)
-        for _ in range(steps_per_action):
-            p.stepSimulation()
-            time.sleep(1.0 / 240.0)
+        # # The policy outputs 8-dimensional actions (7 joint deltas + 1 gripper absolute)
+        # # For xARM7, we use all 7 joint dimensions (joint deltas)
+        # if len(action) >= 7:
+        #     joint_actions = action[:7]  # Take first 7 dimensions for joint deltas
+        # else:
+        #     raise Exception(f"Action has insufficient dimensions: {len(action)} < 7")
+        #
+        # # Ensure we only control the available joints
+        # target_joint_positions = joint_actions
+        # joint_indices_to_control = self.joint_indices[: len(target_joint_positions)]
+        #
+        # # Set joint position targets
+        # p.setJointMotorControlArray(
+        #     bodyUniqueId=self.robot_id,
+        #     jointIndices=joint_indices_to_control,
+        #     controlMode=p.POSITION_CONTROL,
+        #     targetPositions=target_joint_positions,
+        # )
+        #
+        # # Step simulation
+        # steps_per_action = int(240.0 / self.config.control_frequency)
+        # for _ in range(steps_per_action):
+        #     p.stepSimulation()
+        #     time.sleep(1.0 / 240.0)
+        pass
 
 
 def create_policy_input(image, robot_state, prompt):
