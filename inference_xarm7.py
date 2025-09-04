@@ -95,16 +95,30 @@ class XArm7InferenceEnv:
         self.camera_position = np.array(self.config.camera_position)
         self.camera_orientation = p.getQuaternionFromEuler(self.config.camera_orientation_euler)
 
-        self.camera_intrinsics = np.array(
-            [[522.6506958007812, 0.0, 639.2378540039062], [0.0, 522.6506958007812, 352.5005798339844], [0.0, 0.0, 1.0]]
-        )
-
         self.projection_matrix = self._compute_projection_matrix()
+
+    def update_intrinsic_matrix(self, k, old_dims, new_dims):
+        old_h, old_w = old_dims
+        new_h, new_w = new_dims
+        scale_w, scale_h = new_w / old_w, new_h / old_h
+
+        k_new = k.copy()
+        k_new[0, 0] *= scale_w
+        k_new[1, 1] *= scale_h
+        k_new[0, 2] *= scale_w
+        k_new[1, 2] *= scale_h
+
+        return k_new
 
     def _compute_projection_matrix(self):
         """Convert camera intrinsics to PyBullet projection matrix."""
         near, far = 0.1, 3.1
         w, h = self.config.image_width, self.config.image_height
+
+        self.camera_intrinsics = np.array(
+            [[522.6506958007812, 0.0, 639.2378540039062], [0.0, 522.6506958007812, 352.5005798339844], [0.0, 0.0, 1.0]]
+        )
+        self.camera_intrinsics = self.update_intrinsic_matrix(self.camera_intrinsics, (720, 1280), (h, w))
 
         fx = self.camera_intrinsics[0, 0]
         fy = self.camera_intrinsics[1, 1]
