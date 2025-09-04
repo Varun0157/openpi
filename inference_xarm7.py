@@ -24,13 +24,13 @@ class InferenceConfig:
     image_height: int = 180
     camera_position: list = dataclasses.field(
         default_factory=lambda: [
-            0.09378594165842033,
-            0.4828175119051615,
-            0.19511362660974355,
+            0.15923659141867624,
+            0.6106953079437566,
+            0.6006141519303493,
         ]
     )
     camera_orientation_euler: list = dataclasses.field(
-        default_factory=lambda: [-1.859357113506073, -8.922049171955493e-05, -2.557306600133795]
+        default_factory=lambda: [-2.0576377485924557, -0.09344640552548045, -2.261489525224408]
     )
 
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/src_xarm/airobot/urdfs/xarm7_robot.urdf"
@@ -117,7 +117,7 @@ class XArm7InferenceEnv:
         w, h = self.config.image_width, self.config.image_height
 
         self.camera_intrinsics = np.array(
-            [[522.6506958007812, 0.0, 639.2378540039062], [0.0, 522.6506958007812, 352.5005798339844], [0.0, 0.0, 1.0]]
+            [[522.8220825195312, 0.0, 639.23779296875], [0.0, 522.8220825195312, 352.500732421875], [0.0, 0.0, 1.0]]
         )
         self.camera_intrinsics = self.update_intrinsic_matrix(self.camera_intrinsics, (720, 1280), (h, w))
 
@@ -248,7 +248,7 @@ def main():
 
     # Inference loop
     print("Starting inference loop...")
-    prompt = "Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)"
+    prompt = "Turn twistable object (ex: faucets, lamps, stove knobs)"
 
     # Track action execution
     actions_from_chunk = []
