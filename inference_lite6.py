@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Inference script for OpenPI policy on Lite-6 robot arm in PyBullet.
+Inference script for OpenPI policy on xARM7 robot arm in PyBullet.
 """
 
 import os
@@ -29,8 +29,8 @@ class InferenceConfig:
     camera_position: list = dataclasses.field(default_factory=lambda: [0.085036, 0.563473, 0.416859])
     camera_orientation_euler: list = dataclasses.field(default_factory=lambda: [-1.95721, -0.0233935, -2.11812])
 
-    urdf_path: str = "./Embodiment-Codes-RRC/URDF/lite-6/lite_6.urdf"
-    end_effector_link_index: int = 6
+    urdf_path: str = "./Embodiment-Codes-RRC/URDF/src_xarm/airobot/urdfs/xarm7_robot.urdf"
+    end_effector_link_index: int = 7
 
     max_timesteps: int = 1000
     action_horizon: int = 16  # Actions are chunked, execute multiple steps per inference (matches training config)
@@ -39,7 +39,7 @@ class InferenceConfig:
     image_output_dir: str = "./inference_images"
 
 
-class Lite6InferenceEnv:
+class XArm7InferenceEnv:
     def __init__(self, config: InferenceConfig):
         self.config = config
         self.setup_pybullet()
@@ -60,7 +60,7 @@ class Lite6InferenceEnv:
         p.setTimeStep(1.0 / 240.0)  # High frequency simulation
 
     def setup_robot(self):
-        """Load the Lite-6 robot URDF."""
+        """Load the xARM7 robot URDF."""
         self.robot_id = p.loadURDF(self.config.urdf_path, [0, 0, 0], useFixedBase=True)
 
         # Get joint information
@@ -69,11 +69,11 @@ class Lite6InferenceEnv:
 
         print(f"Loaded robot with {self.num_joints} joints")
 
-        # # Set initial joint positions (roughly home position)
-        # home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][: self.num_joints]
-        # for i, angle in enumerate(home_angles):
-        #     if i < self.num_joints:
-        #         p.resetJointState(self.robot_id, i, angle)
+        # Set initial joint positions (roughly home position for xARM7)
+        home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][:self.num_joints]
+        for i, angle in enumerate(home_angles):
+            if i < self.num_joints:
+                p.resetJointState(self.robot_id, i, angle)
 
     def setup_camera(self):
         """Setup camera parameters for image capture."""
@@ -178,7 +178,7 @@ class Lite6InferenceEnv:
     def execute_action(self, action):
         """Execute action on the robot (joint position control)."""
         # The policy outputs 8-dimensional actions (7 joint deltas + 1 gripper absolute)
-        # For Lite-6, we only use the first 7 dimensions (joint deltas)
+        # For xARM7, we use all 7 joint dimensions (joint deltas)
         if len(action) >= 7:
             joint_deltas = action[:7]  # Take first 7 dimensions for joint deltas
         else:
@@ -240,7 +240,7 @@ def main():
     print("Setting up inference environment...")
 
     # Setup environment
-    env = Lite6InferenceEnv(config)
+    env = XArm7InferenceEnv(config)
 
     # Load policy
     print("Loading policy...")
