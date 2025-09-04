@@ -26,8 +26,16 @@ class InferenceConfig:
 
     image_width: int = 320
     image_height: int = 180
-    camera_position: list = dataclasses.field(default_factory=lambda: [0.085036, 0.563473, 0.416859])
-    camera_orientation_euler: list = dataclasses.field(default_factory=lambda: [-1.95721, -0.0233935, -2.11812])
+    camera_position: list = dataclasses.field(
+        default_factory=lambda: [
+            0.09378594165842033,
+            0.4828175119051615,
+            0.19511362660974355,
+        ]
+    )
+    camera_orientation_euler: list = dataclasses.field(
+        default_factory=lambda: [-1.859357113506073, -8.922049171955493e-05, -2.557306600133795]
+    )
 
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/src_xarm/airobot/urdfs/xarm7_robot.urdf"
     end_effector_link_index: int = 7
@@ -70,7 +78,7 @@ class XArm7InferenceEnv:
         print(f"Loaded robot with {self.num_joints} joints")
 
         # Set initial joint positions (roughly home position for xARM7)
-        home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][:self.num_joints]
+        home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][: self.num_joints]
         for i, angle in enumerate(home_angles):
             if i < self.num_joints:
                 p.resetJointState(self.robot_id, i, angle)
@@ -80,41 +88,19 @@ class XArm7InferenceEnv:
         self.camera_position = np.array(self.config.camera_position)
         self.camera_orientation = p.getQuaternionFromEuler(self.config.camera_orientation_euler)
 
-        self.camera_intrinsics = np.array(
-            [[400.0, 0.0, self.config.image_width / 2], [0.0, 400.0, self.config.image_height / 2], [0.0, 0.0, 1.0]]
-        )
+        self.camera_intrinsics = np.array([
+            [522.6506958007812, 0.0, 639.2378540039062],
+            [0.0, 522.6506958007812, 352.5005798339844],
+            [0.0, 0.0, 1.0]
+        ])
 
         # Compute projection matrix for PyBullet
         self.projection_matrix = self._compute_projection_matrix()
-
-    def update_intrinsic_matrix(self, k, old_dims, new_dims):
-        """
-        Update the intrinsic matrix K based on new image dimensions.
-        """
-
-        old_height, old_width = old_dims
-        new_height, new_width = new_dims
-
-        scale_w = new_width / old_width
-        scale_h = new_height / old_height
-
-        k_updated = k.copy()
-        k_updated[0, 0] *= scale_w  # Scale fx
-        k_updated[1, 1] *= scale_h  # Scale fy
-        k_updated[0, 2] *= scale_w  # Scale cx
-        k_updated[1, 2] *= scale_h  # Scale cy
-
-        return k_updated
 
     def _compute_projection_matrix(self):
         """Convert camera intrinsics to PyBullet projection matrix."""
         near, far = 0.1, 3.1
         w, h = self.config.image_width, self.config.image_height
-
-        k_old = np.array([[524.24609375, 0.0, 639.77758789], [0.0, 524.24609375, 370.27789307], [0.0, 0.0, 1.0]])
-        old_dims = (720, 1280)
-
-        self.camera_intrinsics = self.update_intrinsic_matrix(k_old, old_dims, (h, w))
 
         fx = self.camera_intrinsics[0, 0]
         fy = self.camera_intrinsics[1, 1]
@@ -186,14 +172,14 @@ class XArm7InferenceEnv:
 
         # Get current joint positions
         current_joint_positions = self.get_robot_state()
-        
+
         # Convert delta actions to absolute positions
         # First 7 dimensions are deltas, add to current positions
-        target_joint_positions = current_joint_positions[:len(joint_deltas)] + joint_deltas
-        
+        target_joint_positions = current_joint_positions[: len(joint_deltas)] + joint_deltas
+
         # Ensure we only control the available joints
-        target_joint_positions = target_joint_positions[:self.num_joints]
-        joint_indices_to_control = self.joint_indices[:len(target_joint_positions)]
+        target_joint_positions = target_joint_positions[: self.num_joints]
+        joint_indices_to_control = self.joint_indices[: len(target_joint_positions)]
 
         # Set joint position targets
         p.setJointMotorControlArray(
