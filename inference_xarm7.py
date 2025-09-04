@@ -192,7 +192,6 @@ class XArm7InferenceEnv:
             jointIndices=joint_indices_to_control,
             controlMode=p.POSITION_CONTROL,
             targetPositions=target_joint_positions,
-            forces=[50.0] * len(target_joint_positions),  # Adjust force limits as needed
         )
 
         # Step simulation
