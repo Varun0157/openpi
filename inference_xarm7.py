@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 import pybullet as p
 import pybullet_data
-from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Rotation as Rot
 
 from openpi.policies import policy_config as _policy_config
 from openpi.training import config as _config
@@ -141,7 +141,7 @@ class XArm7InferenceEnv:
     def capture_image(self, step_idx=None):
         """Capture RGB image from the camera."""
         # Compute camera target position
-        rot_matrix = R.from_quat(self.camera_orientation).as_matrix()
+        rot_matrix = Rot.from_quat(self.camera_orientation).as_matrix()
         camera_target = self.camera_position + rot_matrix @ np.array([0, 0, 1])
 
         # Compute view matrix
