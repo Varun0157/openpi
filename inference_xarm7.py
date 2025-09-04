@@ -81,9 +81,15 @@ class XArm7InferenceEnv:
             0.058147608614682836,
         ]
         for i, angle in enumerate(initial_state):
-            if i >= self.num_joints:
-                break
-            p.resetJointState(self.robot_id, i, angle)
+            #     if i >= self.num_joints:
+            #         break
+            #     p.resetJointState(self.robot_id, i, angle)
+            p.setJointMotorControl2(
+                self.robot_id,
+                i + 1,
+                p.POSITION_CONTROL,
+                angle,
+            )
 
     def setup_camera(self):
         """Setup camera parameters for image capture."""
