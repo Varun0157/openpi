@@ -239,7 +239,9 @@ def main():
 
     # Inference loop
     print("Starting inference loop...")
-    prompt = "Move the robot arm"  # Default prompt
+    prompt = (
+        "Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)"  # Default prompt
+    )
 
     # Track action execution
     actions_from_chunk = []
