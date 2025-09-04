@@ -20,7 +20,7 @@ from openpi.training import config as _config
 @dataclasses.dataclass
 class InferenceConfig:
     # Checkpoint directory path
-    checkpoint_dir: str = "/path/to/your/checkpoint"  # Update this path
+    checkpoint_dir: str = "checkpoints/pi0_fast_droid_finetune_low_mem"  # Update this path
 
     # PyBullet settings
     use_gui: bool = False  # Set to False for headless mode on server
@@ -208,7 +208,7 @@ def create_policy_input(image, robot_state, prompt):
 def main():
     # Configuration
     config = InferenceConfig(
-        checkpoint_dir="/path/to/your/pi0_fast_droid_finetune_low_mem/checkpoint",  # Update this!
+        checkpoint_dir="checkpoints/pi0_fast_droid_finetune_low_mem",  # Update this!
         use_gui=False,  # Set to False for headless server mode
         save_images=True,
     )
