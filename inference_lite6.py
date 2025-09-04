@@ -177,24 +177,31 @@ class Lite6InferenceEnv:
 
     def execute_action(self, action):
         """Execute action on the robot (joint position control)."""
-        # The policy outputs 8-dimensional actions (7 joints + 1 gripper)
-        # For Lite-6, we only use the first 7 dimensions (joint positions)
+        # The policy outputs 8-dimensional actions (7 joint deltas + 1 gripper absolute)
+        # For Lite-6, we only use the first 7 dimensions (joint deltas)
         if len(action) >= 7:
-            joint_action = action[:7]  # Take first 7 dimensions for joints
+            joint_deltas = action[:7]  # Take first 7 dimensions for joint deltas
         else:
             raise Exception(f"Action has insufficient dimensions: {len(action)} < 7")
 
+        # Get current joint positions
+        current_joint_positions = self.get_robot_state()
+        
+        # Convert delta actions to absolute positions
+        # First 7 dimensions are deltas, add to current positions
+        target_joint_positions = current_joint_positions[:len(joint_deltas)] + joint_deltas
+        
         # Ensure we only control the available joints
-        joint_action = joint_action[: self.num_joints]
-        joint_indices_to_control = self.joint_indices[: len(joint_action)]
+        target_joint_positions = target_joint_positions[:self.num_joints]
+        joint_indices_to_control = self.joint_indices[:len(target_joint_positions)]
 
         # Set joint position targets
         p.setJointMotorControlArray(
             bodyUniqueId=self.robot_id,
             jointIndices=joint_indices_to_control,
             controlMode=p.POSITION_CONTROL,
-            targetPositions=joint_action,
-            forces=[50.0] * len(joint_action),  # Adjust force limits as needed
+            targetPositions=target_joint_positions,
+            forces=[50.0] * len(target_joint_positions),  # Adjust force limits as needed
         )
 
         # Step simulation
