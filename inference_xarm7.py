@@ -19,7 +19,7 @@ from openpi.training import config as _config
 
 @dataclasses.dataclass
 class InferenceConfig:
-    checkpoint_dir: str = "checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499"  # Update this path
+    checkpoint_dir: str = "checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499"
 
     use_gui: bool = False  # Set to False for headless mode on server
     control_frequency: float = 15.0  # Hz, matching DROID data collection frequency
@@ -41,7 +41,7 @@ class InferenceConfig:
     end_effector_link_index: int = 7
 
     max_timesteps: int = 1000
-    action_horizon: int = 16  # Actions are chunked, execute multiple steps per inference (matches training config)
+    action_horizon: int = 16
 
     save_images: bool = True
     image_output_dir: str = "./inference_images"
@@ -77,7 +77,6 @@ class XArm7InferenceEnv:
 
         print(f"Loaded robot with {self.num_joints} joints")
 
-        # Set initial joint positions (roughly home position for xARM7)
         initial_state = [
             0.11024115004068978,
             -0.29933845557606764,
@@ -203,11 +202,6 @@ class XArm7InferenceEnv:
 
 def create_policy_input(image, robot_state, prompt):
     """Create input dictionary for the policy."""
-    # The DROID RLDS config expects these specific keys based on the repack transform:
-    # "observation/image": "observation/image"
-    # "observation/state": "observation/state"
-    # "prompt": "prompt"
-
     # Resize image to expected size (224x224 for DROID policy)
     image_resized = cv2.resize(image, (224, 224))
     state = np.concatenate([robot_state, [0.0]])[:8] if len(robot_state) < 8 else robot_state[:8]
@@ -220,9 +214,8 @@ def create_policy_input(image, robot_state, prompt):
 
 
 def main():
-    # Configuration
     config = InferenceConfig(
-        checkpoint_dir="checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499",  # Update this!
+        checkpoint_dir="checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499",
         use_gui=False,  # Set to False for headless server mode
         save_images=True,
     )
@@ -246,9 +239,7 @@ def main():
 
     # Inference loop
     print("Starting inference loop...")
-    prompt = (
-        "Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)"  # Default prompt
-    )
+    prompt = "Move object into or out of container (ex: drawer, clothes hamper, plate, trashcan, washer)"
 
     # Track action execution
     actions_from_chunk = []
