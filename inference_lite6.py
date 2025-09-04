@@ -19,32 +19,22 @@ from openpi.training import config as _config
 
 @dataclasses.dataclass
 class InferenceConfig:
-    # Checkpoint directory path
     checkpoint_dir: str = "checkpoints/pi0_fast_droid_finetune_low_mem/my_experiment/499"  # Update this path
 
-    # PyBullet settings
     use_gui: bool = False  # Set to False for headless mode on server
     control_frequency: float = 15.0  # Hz, matching DROID data collection frequency
 
-    # Camera settings
     image_width: int = 320
     image_height: int = 180
-    camera_position: list = dataclasses.field(
-        default_factory=lambda: [0.085036, 0.563473, 0.416859]
-    )  # Adjust based on your setup
-    camera_orientation_euler: list = dataclasses.field(
-        default_factory=lambda: [-1.95721, -0.0233935, -2.11812]
-    )  # radians
+    camera_position: list = dataclasses.field(default_factory=lambda: [0.085036, 0.563473, 0.416859])
+    camera_orientation_euler: list = dataclasses.field(default_factory=lambda: [-1.95721, -0.0233935, -2.11812])
 
-    # Robot settings
     urdf_path: str = "./Embodiment-Codes-RRC/URDF/lite-6/lite_6.urdf"
     end_effector_link_index: int = 6
 
-    # Inference settings
-    max_timesteps: int = 1000
+    max_timesteps: int = 100
     action_horizon: int = 16  # Actions are chunked, execute multiple steps per inference (matches training config)
 
-    # Output settings
     save_images: bool = True
     image_output_dir: str = "./inference_images"
 
@@ -79,18 +69,17 @@ class Lite6InferenceEnv:
 
         print(f"Loaded robot with {self.num_joints} joints")
 
-        # Set initial joint positions (roughly home position)
-        home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][: self.num_joints]
-        for i, angle in enumerate(home_angles):
-            if i < self.num_joints:
-                p.resetJointState(self.robot_id, i, angle)
+        # # Set initial joint positions (roughly home position)
+        # home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][: self.num_joints]
+        # for i, angle in enumerate(home_angles):
+        #     if i < self.num_joints:
+        #         p.resetJointState(self.robot_id, i, angle)
 
     def setup_camera(self):
         """Setup camera parameters for image capture."""
         self.camera_position = np.array(self.config.camera_position)
         self.camera_orientation = p.getQuaternionFromEuler(self.config.camera_orientation_euler)
 
-        # TODO: ask how we usually account for this in sim
         self.camera_intrinsics = np.array(
             [[400.0, 0.0, self.config.image_width / 2], [0.0, 400.0, self.config.image_height / 2], [0.0, 0.0, 1.0]]
         )
@@ -102,8 +91,6 @@ class Lite6InferenceEnv:
         """
         Update the intrinsic matrix K based on new image dimensions.
         """
-
-        # NOTE :  Mention the site later !
 
         old_height, old_width = old_dims
         new_height, new_width = new_dims
@@ -127,7 +114,7 @@ class Lite6InferenceEnv:
         k_old = np.array([[524.24609375, 0.0, 639.77758789], [0.0, 524.24609375, 370.27789307], [0.0, 0.0, 1.0]])
         old_dims = (720, 1280)
 
-        k = self.update_intrinsic_matrix(k_old, old_dims, (h, w))
+        self.camera_intrinsics = self.update_intrinsic_matrix(k_old, old_dims, (h, w))
 
         fx = self.camera_intrinsics[0, 0]
         fy = self.camera_intrinsics[1, 1]
