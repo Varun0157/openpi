@@ -59,7 +59,6 @@ class XArm7InferenceEnv:
             p.connect(p.DIRECT)  # Headless mode
 
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        p.loadURDF("plane.urdf")
         p.setGravity(0, 0, -9.8)
         p.setTimeStep(1.0 / 240.0)  # High frequency simulation
 
