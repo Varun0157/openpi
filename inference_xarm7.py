@@ -78,8 +78,16 @@ class XArm7InferenceEnv:
         print(f"Loaded robot with {self.num_joints} joints")
 
         # Set initial joint positions (roughly home position for xARM7)
-        home_angles = [0.0, -0.5, 0.0, -1.5, 0.0, 1.0, 0.0][: self.num_joints]
-        for i, angle in enumerate(home_angles):
+        initial_state = [
+            0.11024115004068978,
+            -0.29933845557606764,
+            0.05442884930953815,
+            0.9136438149155726,
+            0.08774621794390562,
+            1.2080655976492474,
+            0.058147608614682836,
+        ]
+        for i, angle in enumerate(initial_state):
             if i < self.num_joints:
                 p.resetJointState(self.robot_id, i, angle)
 
