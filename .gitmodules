@@ -4,3 +4,6 @@
 [submodule "third_party/libero"]
 	path = third_party/libero
 	url = https://github.com/Lifelong-Robot-Learning/LIBERO.git
+[submodule "Embodiment-Codes-RRC"]
+	path = Embodiment-Codes-RRC
+	url = https://github.com/AniruthSuresh/Embodiment-Codes-RRC.git
