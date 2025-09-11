@@ -743,6 +743,31 @@ _CONFIGS = [
         # Turn off EMA for LORA finetuning.
         ema_decay=None,
     ),
+    TrainConfig(
+        name="real_xarm6",
+        model=pi0_fast.Pi0FASTConfig(
+            action_dim=7,
+            action_horizon=10,
+            max_token_len=180,
+            paligemma_variant="gemma_2b_lora",
+        ),
+        data=RLDSDroidDataConfig(
+            repo_id="droid",
+            # Set this to the path to your DROID RLDS dataset (the parent directory of the `droid` directory).
+            rlds_data_dir="/scratch2/cross-emb/openpi/x_arm_real_dataset",
+            action_space=droid_rlds_dataset.DroidActionSpace.JOINT_VELOCITY,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_fast_base/params"),
+        num_train_steps=1000,  # 100k steps should be sufficient, takes ~2 days on 8x H100s
+        batch_size=64,
+        save_interval=250,
+        num_workers=0,  # Important: RLDS DataLoader requires num_workers=0, handles multi-processing internally
+        freeze_filter=pi0_fast.Pi0FASTConfig(
+            action_dim=7, action_horizon=10, max_token_len=180, paligemma_variant="gemma_2b_lora"
+        ).get_freeze_filter(),
+        # Turn off EMA for LORA finetuning.
+        ema_decay=None,
+    ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.
     #
