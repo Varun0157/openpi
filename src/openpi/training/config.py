@@ -754,7 +754,7 @@ _CONFIGS = [
         data=RLDSDroidDataConfig(
             repo_id="droid",
             # Set this to the path to your DROID RLDS dataset (the parent directory of the `droid` directory).
-            rlds_data_dir="/scratch2/cross-emb/openpi_datasets/x_arm_real_dataset",
+            rlds_data_dir="../openpi_datasets/x_arm_real_dataset",
             action_space=droid_rlds_dataset.DroidActionSpace.JOINT_VELOCITY,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_fast_base/params"),
